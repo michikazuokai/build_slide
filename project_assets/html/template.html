@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>画像一覧</title>
+  <style>
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+      gap: 10px;
+      max-width: 600px;
+    }
+    .image-grid figure {
+      text-align: center;
+      margin: 0;
+    }
+    .image-grid img {
+      width: 40px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>画像ギャラリー</h1>
+  <div class="image-grid">
+    {% for item in images %}
+    <figure>
+      <img src="{{ base_path }}{{ item.src }}" alt="{{ item.alt }}">
+      <figcaption>{{ item.caption }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</body>
+</html>

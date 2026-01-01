@@ -1,0 +1,201 @@
+%----------------------------------------------------------------------------------------
+%  metropolis template (refactored)
+%----------------------------------------------------------------------------------------
+%@@notesdocumentmode@@
+
+% \documentclass の直後で hyperref のオプションを渡す（metropolisでも安全）
+\PassOptionsToPackage{unicode=true,colorlinks=true,linkcolor=blue,urlcolor=blue}{hyperref}
+
+\usetheme{metropolis}
+\metroset{block=fill, sectionpage=progressbar, progressbar=foot}
+
+% 背景色（tech のとき白など）: Pythonで差し込み
+%@@setbeamcolor@@
+
+%--------------------------
+% 日本語
+%--------------------------
+\usepackage{luatexja}
+\usepackage{luatexja-fontspec}
+\setsansjfont{Hiragino Sans}[BoldFont={Hiragino Sans W6}]
+
+%--------------------------
+% 基本パッケージ（重複なし）
+%--------------------------
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage[abs]{overpic}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{mathtools}
+\usepackage{longtable}
+\usepackage{pdfpages}
+\usepackage{etoolbox} % AtBeginEnvironment 等
+
+% minted（※ -shell-escape 必須）
+\usepackage{minted}
+\setminted{
+  frame=single,
+  framesep=2mm,
+  fontsize=\footnotesize,
+  breaklines=true
+}
+
+% （必要なときだけ）tcolorbox
+\usepackage[most]{tcolorbox}
+
+% hyperref は最後
+\usepackage{hyperref}
+
+%--------------------------
+% パス
+%--------------------------
+\newcommand{\assetpath}{@@sourcedir@@}
+\graphicspath{{images/}{\assetpath/@@sdir@@/images/}{../project_assets/images/}{../project_assets/emoji/emoji_pngs/}}
+
+%--------------------------
+% フッター
+%--------------------------
+\newcommand{\myfootertext}{@@sdir@@}
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox to \paperwidth{%
+    \hspace*{0.2cm}
+    \scriptsize\color{gray!50} \myfootertext
+    \hfill
+    \scriptsize\color{gray} \insertframenumber{} / \inserttotalframenumber
+    \hspace*{0.4cm}
+  }%
+  \vspace{1pt}
+}
+
+%--------------------------
+% TeacherFrame（外部）
+%--------------------------
+\usepackage{../teacherframe}
+
+%--------------------------
+% フレームタイトル：番号. タイトル
+% ※ ここで出すだけ。insertframetitle を再定義しない（安全）
+%--------------------------
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6ex}%
+  \begin{beamercolorbox}[wd=\paperwidth,sep=0.5ex,leftskip=0.9em,rightskip=0.5em]{frametitle}%
+    \usebeamerfont{frametitle}%
+    \insertframenumber.\,\insertframetitle%
+  \end{beamercolorbox}%
+}
+
+%--------------------------
+% 表用：列型
+%--------------------------
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\raggedright\arraybackslash}m{#1}}
+
+%--------------------------
+% ブロック（必要なら）
+%--------------------------
+\definecolor{myblue}{HTML}{7488FF}
+\definecolor{mylightblue}{HTML}{E3EEFF}
+\setbeamertemplate{blocks}[rounded]
+\setbeamercolor{block title}{bg=myblue, fg=white}
+\setbeamercolor{block body}{bg=mylightblue, fg=black}
+
+%--------------------------
+% 奇数ページのスライドのを表示する
+%（教示用だけでそれ以外はこの処理は動かない）
+%--------------------------
+% --- 教師用だけ、スライドを奇数開始に強制するトグル ---
+\newif\ifoddslideenforce
+\oddslideenforcefalse   % デフォルトOFF（pr/hoはOFF）
+
+% --- 再帰防止ガード ---
+\newif\ifoddslideguard
+\oddslideguardfalse
+
+% --- 偶数ページなら空白スライドを1枚入れて奇数に戻す ---
+\newcommand{\ensureoddslide}{%
+  \ifoddslideguard\relax\else
+    \oddslideguardtrue
+    \ifodd\value{page}\relax
+      % 何もしない（次が奇数）
+    \else
+      \begin{frame}[plain,noframenumbering]
+        \note{}% notes出力時に2枚消費させる保険
+      \end{frame}
+    \fi
+    \oddslideguardfalse
+  \fi
+}
+
+% --- frameが始まる直前に自動挿入（教師用だけ）---
+\BeforeBeginEnvironment{frame}{%
+  \ifoddslideenforce
+    \ensureoddslide
+  \fi
+}
+
+%--------------------------
+% note / noteT の「常時安全化」
+%  - tech 以外：\noteT は無視（エラーにならない）
+%  - tech：notesmode_tech で上書き定義
+%--------------------------
+\providecommand{\notetitletext}{}      % 既にあっても衝突しない
+\providecommand{\noteT}[2]{}           % デフォルトは何もしない
+
+% frame開始ごとにタイトル変数をクリア（前の noteT が残らないように）
+\AtBeginEnvironment{frame}{\gdef\notetitletext{}}
+
+%--------------------------
+% 切替（Pythonから差し込み）
+%--------------------------
+%@@pausemode@@
+%@@teachermode@@
+%@@notesmode@@
+%-------------
+%@@notesmode_tech@@
+
+%----------------------------------------------------------------------------------------
+% タイトル
+%----------------------------------------------------------------------------------------
+\title{ @@stitle@@ }
+\date{}
+\newcommand{\codedir}{\assetpath/@@sdir@@}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  % \titlepage
+  \bigskip
+  \begin{center}
+    \ifteachermode 教師用 \fi
+  \end{center}
+\end{frame}
+
+% セクションページ（必要なら）
+\setbeamertemplate{section page}{
+  \begin{centering}
+    \vfill
+    \rule{\linewidth}{2pt}\par
+    \vspace{1ex}
+    {\usebeamerfont{section title}\Huge\bfseries \insertsection}\par
+    \vspace{1ex}
+    \rule{\linewidth}{2pt}\par
+    \vfill
+  \end{centering}
+}
+\setbeamerfont{section title}{size=\LARGE,series=\bfseries}
+
+\AtBeginSection[]{
+  \begin{frame}[plain,noframenumbering]
+    \sectionpage
+  \end{frame}
+}
+
+% 本編開始でフレーム番号を0から（必要なら）
+\setcounter{framenumber}{0}
+
+\input{emoji_macros}

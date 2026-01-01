@@ -1,0 +1,7 @@
+!!python/object/apply:pathlib.PosixPath
+- /
+- Volumes
+- NBPlan
+- TTC
+- build_slide
+- slideinfo.yaml

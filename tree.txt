@@ -1,0 +1,358 @@
+.
+├── __pycache__
+│   ├── slideinfo.cpython-310.pyc
+│   ├── slideinfo.cpython-311.pyc
+│   ├── slideinfo.cpython-312.pyc
+│   ├── slideinfo.cpython-39.pyc
+│   └── slideinfo.cpython-39.pyc.4313822000
+├── _minted
+│   ├── _FAD58DE7366495DB4650CFEFAC2FCD61.index.minted
+│   ├── 03538C730028004B6216307A15F21C68.highlight.minted
+│   ├── 17B5C5D121E9BD4A5024B2576B7C85E2.highlight.minted
+│   ├── 58784EBF6C48BFF64955E50CB1D01406.highlight.minted
+│   ├── 5F081C99281B22CF7500A29FEE7ED78D.highlight.minted
+│   ├── 650191D831B8E0EC88078F07D342942B.highlight.minted
+│   ├── default.style.minted
+│   ├── F7BCC44DBD16EDBE2613801230E866A1.highlight.minted
+│   ├── FCDF7512B89C4D45C6FD6E9788A7BD75.highlight.minted
+│   └── FCF87F30C04CFF20D07A89084DBF3DB9.highlight.minted
+├── build
+│   ├── _minted
+│   │   ├── _FAD58DE7366495DB4650CFEFAC2FCD61.index.minted
+│   │   ├── 23B7A1A18E11C0EB2C52FC3613C57E3A.highlight.minted
+│   │   └── default.style.minted
+│   ├── emoji_macros.tex
+│   ├── grid_debug.tex
+│   ├── main.aux
+│   ├── main.fdb_latexmk
+│   ├── main.fls
+│   ├── main.log
+│   ├── main.ltjruby
+│   ├── main.nav
+│   ├── main.out
+│   ├── main.pdf
+│   ├── main.snm
+│   ├── main.tex
+│   ├── main.toc
+│   └── main.vrb
+├── build_slides.py
+├── build_slides1.py
+├── emoji.html
+├── lined_text.png
+├── metro_template_org1.txt
+├── michokaigithub
+├── michokaigithub.pub
+├── miscellaneous
+│   ├── build_metro.py
+│   ├── build_pdf.py
+│   ├── build_pdf2.py
+│   ├── images
+│   │   ├── arrow_green.png
+│   │   ├── arrow1.png
+│   │   ├── arrow2.png
+│   │   ├── bell.png
+│   │   ├── book1.png
+│   │   ├── book2.png
+│   │   ├── box1.png
+│   │   ├── box2.png
+│   │   ├── buble.jpg
+│   │   ├── buble.png
+│   │   ├── calender1.png
+│   │   ├── caution.png
+│   │   ├── check.png
+│   │   ├── check2.png
+│   │   ├── doc1.png
+│   │   ├── doc2.png
+│   │   ├── doc3.png
+│   │   ├── dot.png
+│   │   ├── foot.png
+│   │   ├── gear.png
+│   │   ├── globe.png
+│   │   ├── graduationcap.png
+│   │   ├── hand1.png
+│   │   ├── hint.png
+│   │   ├── hummer.png
+│   │   ├── key1.png
+│   │   ├── key2.png
+│   │   ├── logo.png
+│   │   ├── loop.png
+│   │   ├── magnifying.png
+│   │   ├── mato.png
+│   │   ├── monitor.png
+│   │   ├── no.png
+│   │   ├── pallet.png
+│   │   ├── PC.png
+│   │   ├── pen1.png
+│   │   ├── piece.png
+│   │   ├── pin.png
+│   │   ├── plus.png
+│   │   ├── plus2.png
+│   │   ├── point1.png
+│   │   ├── point2.png
+│   │   ├── question.png
+│   │   ├── receipt1.png
+│   │   ├── rocket.png
+│   │   ├── speechbaloon.png
+│   │   ├── square1.png
+│   │   ├── testtube.png
+│   │   ├── thumbs.png
+│   │   ├── thumbsup.png
+│   │   ├── tool.png
+│   │   ├── yes.png
+│   │   ├── グラフ1.png
+│   │   ├── クリップ.png
+│   │   ├── グループ.png
+│   │   ├── ゴミ箱.png
+│   │   ├── コントローラ.png
+│   │   ├── サイコロ.png
+│   │   ├── ストップウォッチ.png
+│   │   ├── スパナ.png
+│   │   ├── パソコン.png
+│   │   ├── ばつ.jpg
+│   │   ├── ばつ.png
+│   │   ├── びっくり1.png
+│   │   ├── フォルダ１.png
+│   │   ├── フォルダ２.png
+│   │   ├── フォルダ３.png
+│   │   ├── ふきだし.png
+│   │   ├── まとめ.png
+│   │   ├── まる.jpg
+│   │   ├── まる.png
+│   │   ├── まるばつ.png
+│   │   ├── リンク.png
+│   │   ├── 鉛筆.png
+│   │   ├── 拡声器.png
+│   │   ├── 顔1.png
+│   │   ├── 逆三角.png
+│   │   ├── 叫ぶ.png
+│   │   ├── 建物１.png
+│   │   ├── 元ネタ.png
+│   │   ├── 元ネタ2.png
+│   │   ├── 元ネタ3.png
+│   │   ├── 三角.png
+│   │   ├── 指1.png
+│   │   ├── 指2.png
+│   │   ├── 受信トレイ1.png
+│   │   ├── 受信トレイ2.png
+│   │   ├── 初心者.png
+│   │   ├── 食事.png
+│   │   ├── 図1.png
+│   │   ├── 足あと.png
+│   │   ├── 地図.png
+│   │   ├── 虫メガネ.png
+│   │   ├── 点1.png
+│   │   ├── 点2.png
+│   │   ├── 点のイラスト1.png
+│   │   ├── 電球.png
+│   │   ├── 脳.png
+│   │   ├── 望遠鏡.png
+│   │   └── 葉っぱ.png
+│   ├── modified_slide.tex
+│   ├── readtex.py
+│   ├── session_slide.tex
+│   ├── test.tex
+│   ├── testout2.py
+│   ├── testout3.py
+│   ├── テーマの違い.md
+│   └── 堅牢な仕組み.pdf
+├── mousepos.py
+├── myslides.sty
+├── output_with_line.png
+├── output.png
+├── output.yaml
+├── project_assets
+│   ├── emoji
+│   │   ├── emoji_pngs
+│   │   │   ├── bang.png
+│   │   │   ├── banzai.png
+│   │   │   ├── blacktrianglea.png
+│   │   │   ├── blacktriangleb.png
+│   │   │   ├── bluediamond.png
+│   │   │   ├── book.png
+│   │   │   ├── booka.png
+│   │   │   ├── bookb.png
+│   │   │   ├── box.png
+│   │   │   ├── brain.png
+│   │   │   ├── bublex1.png
+│   │   │   ├── calenderx.png
+│   │   │   ├── caution.png
+│   │   │   ├── checkx.png
+│   │   │   ├── clip.png
+│   │   │   ├── clipboard.png
+│   │   │   ├── docx1.png
+│   │   │   ├── docx2.png
+│   │   │   ├── explosion.png
+│   │   │   ├── facea.png
+│   │   │   ├── foldera.png
+│   │   │   ├── garbage.png
+│   │   │   ├── gcap.png
+│   │   │   ├── gear.png
+│   │   │   ├── globe.png
+│   │   │   ├── glowingstar.png
+│   │   │   ├── groupa.png
+│   │   │   ├── key.png
+│   │   │   ├── lab.png
+│   │   │   ├── link.png
+│   │   │   ├── loopx.png
+│   │   │   ├── map.png
+│   │   │   ├── memo.png
+│   │   │   ├── MG.png
+│   │   │   ├── monitor.png
+│   │   │   ├── ng.png
+│   │   │   ├── ok.png
+│   │   │   ├── palettex1.png
+│   │   │   ├── pc.png
+│   │   │   ├── pen.png
+│   │   │   ├── piece.png
+│   │   │   ├── pinx.png
+│   │   │   ├── piny.png
+│   │   │   ├── r_yubi.png
+│   │   │   ├── rocket.png
+│   │   │   ├── speechB.png
+│   │   │   ├── stopwatch.png
+│   │   │   ├── target.png
+│   │   │   ├── telescorpe.png
+│   │   │   ├── testtubex1.png
+│   │   │   ├── time.png
+│   │   │   ├── tool.png
+│   │   │   ├── toolx2.png
+│   │   │   ├── uyubi.png
+│   │   │   ├── wrench.png
+│   │   │   ├── 三角.png
+│   │   │   └── 点2.png
+│   │   └── makeemoji.py
+│   ├── html
+│   │   ├── __pycache__
+│   │   │   └── convert.cpython-311.pyc
+│   │   ├── convert.py
+│   │   ├── data.json
+│   │   ├── emoji.html
+│   │   ├── htmlgen.py
+│   │   ├── index.html
+│   │   ├── output.html
+│   │   ├── script.js
+│   │   └── template.html
+│   └── images
+│       ├── arrow_green.png
+│       ├── arrow1.png
+│       ├── arrow2.png
+│       ├── bell.png
+│       ├── book1.png
+│       ├── book2.png
+│       ├── box1.png
+│       ├── box2.png
+│       ├── buble.jpg
+│       ├── buble.png
+│       ├── calender1.png
+│       ├── caution.png
+│       ├── check.png
+│       ├── check2.png
+│       ├── doc1.png
+│       ├── doc2.png
+│       ├── doc3.png
+│       ├── dot.png
+│       ├── foot.png
+│       ├── gear.png
+│       ├── globe.png
+│       ├── graduationcap.png
+│       ├── hand1.png
+│       ├── hint.png
+│       ├── hummer.png
+│       ├── key1.png
+│       ├── key2.png
+│       ├── logo.png
+│       ├── loop.png
+│       ├── magnifying.png
+│       ├── mato.png
+│       ├── monitor.png
+│       ├── no.png
+│       ├── pallet.png
+│       ├── PC.png
+│       ├── pen1.png
+│       ├── piece.png
+│       ├── pin.png
+│       ├── plus.png
+│       ├── plus2.png
+│       ├── point1.png
+│       ├── point2.png
+│       ├── question.png
+│       ├── receipt1.png
+│       ├── rocket.png
+│       ├── speechbaloon.png
+│       ├── square1.png
+│       ├── testtube.png
+│       ├── thumbs.png
+│       ├── thumbsup.png
+│       ├── tool.png
+│       ├── yes.png
+│       ├── グラフ1.png
+│       ├── クリップ.png
+│       ├── グループ.png
+│       ├── ゴミ箱.png
+│       ├── コントローラ.png
+│       ├── サイコロ.png
+│       ├── ストップウォッチ.png
+│       ├── スパナ.png
+│       ├── パソコン.png
+│       ├── ばつ.jpg
+│       ├── ばつ.png
+│       ├── びっくり1.png
+│       ├── フォルダ１.png
+│       ├── フォルダ２.png
+│       ├── フォルダ３.png
+│       ├── ふきだし.png
+│       ├── まとめ.png
+│       ├── まる.jpg
+│       ├── まる.png
+│       ├── まるばつ.png
+│       ├── リンク.png
+│       ├── 鉛筆.png
+│       ├── 拡声器.png
+│       ├── 顔1.png
+│       ├── 逆三角.png
+│       ├── 叫ぶ.png
+│       ├── 建物１.png
+│       ├── 元ネタ.png
+│       ├── 元ネタ2.png
+│       ├── 元ネタ3.png
+│       ├── 三角.png
+│       ├── 指1.png
+│       ├── 指2.png
+│       ├── 受信トレイ1.png
+│       ├── 受信トレイ2.png
+│       ├── 初心者.png
+│       ├── 食事.png
+│       ├── 図1.png
+│       ├── 足あと.png
+│       ├── 地図.png
+│       ├── 虫メガネ.png
+│       ├── 点1.png
+│       ├── 点2.png
+│       ├── 点のイラスト1.png
+│       ├── 電球.png
+│       ├── 脳.png
+│       ├── 望遠鏡.png
+│       └── 葉っぱ.png
+├── sample.c
+├── sample.txt
+├── sample1.c
+├── screenshot.py
+├── slideinfo.json
+├── slideinfo.py
+├── slideinfo.yaml
+├── teacherframe.sty
+├── templates
+│   ├── main_template_org.txt
+│   ├── main_template_org1.txt
+│   ├── main_template.tex
+│   ├── metro_template_org.txt
+│   ├── metro_template_org1_chatgpt.txt
+│   ├── metro_template_org1.txt
+│   ├── metro_template.tex
+│   └── template_slidetitle.txt
+├── texread.py
+├── titlePrint.py
+├── titlePrint1.py
+└── tree.txt
+
+14 directories, 342 files

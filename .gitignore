@@ -1,0 +1,46 @@
+# --- Python --------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- LaTeX (Minted) ------------------------------------------
+# 自動生成されるコードハイライト用キャッシュ
+_minted*/
+
+# --- build ディレクトリの制御 ----------------------------------
+# 一旦すべてを無視
+build/*
+
+# .tex ファイルだけは管理対象に戻す（! は否定）
+!build/*.tex
+
+# ただし、main.tex は不要なので除外
+build/main.tex
+
+# --- Security (絶対公開禁止) ----------------------------------
+# SSH秘密鍵・公開鍵
+michokaigithub
+michokaigithub.pub
+
+# --- OS / IDE -----------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Artifacts / Temp ---------------------------------------
+# スクリプト等で一時的に生成される画像やログ
+output.png
+output_with_line.png
+screenshot.py.log
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.ltjruby
