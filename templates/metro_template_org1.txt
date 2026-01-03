@@ -27,6 +27,7 @@
 \usepackage{graphicx}
 \usepackage[abs]{overpic}
 \usepackage{tikz}
+\usetikzlibrary{positioning, shapes.geometric} % ← shapes.geometric を追加
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{booktabs}
@@ -49,9 +50,33 @@
 
 % （必要なときだけ）tcolorbox
 \usepackage[most]{tcolorbox}
+\tcbuselibrary{skins}        % 高度なデザイン機能
 
 % hyperref は最後
 \usepackage{hyperref}
+
+% --- 1. カラーパレットの定義 ---
+\definecolor{CanvaGreen}{HTML}{2E7D32} % メインの濃い緑（タイトル・枠線）
+\definecolor{PaleGreen}{HTML}{F1F8E9}  % 背景の薄い緑
+\definecolor{MyDarkGreen}{HTML}{587a7f}
+\definecolor{DeepText}{HTML}{1C1C1C}   % 本文の文字色
+
+% --- 2. tcolorbox のデフォルト設定（全ボックスに適用） ---
+\tcbset{
+    enhanced,                          % 高度な装飾を有効化
+    colback=white,                 % 本文背景色
+    colframe=MyDarkGreen,               % 枠線の色
+    coltitle=white,                    % タイトル文字色
+    fonttitle=\bfseries\sffamily,      % タイトルを太字・ゴシック
+    boxrule=1pt,                       % 枠線の太さ
+    arc=2mm,                           % 角の丸み
+    left=3mm, right=3mm,               % 左右の余白
+    top=0.5mm, bottom=0.5mm,               % 本文の上下余白
+    toptitle=0.8mm, bottomtitle=0.5mm, % タイトル内の上下余白
+    before skip=0.8em, after skip=0.2em,   % ボックス前後の行間
+    shadow={0mm}{0mm}{0mm}{black!0}    % 影を完全に消してフラットに
+}
+
 
 %--------------------------
 % パス
