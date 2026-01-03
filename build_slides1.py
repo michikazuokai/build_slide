@@ -9,7 +9,6 @@ import shutil
 import sys
 import time
 import os
-
 import slideinfo  # slidedir(), slidetitle(), slideinfoupdate(), getsourcedir()
 
 
@@ -209,6 +208,40 @@ def apply_modes_to_template(tex_head: str, *, ho: bool, tech: bool) -> str:
     return tex_head
 
 
+
+BAND_TAG = "%@@PAGEBAND@@"
+
+def make_band(n: int) -> str:
+    return (
+        f"\n{BAND_TAG}\n"
+        f"% ----------------------------------------------------------------------------------------\n"
+        f"%   page {n:02d}\n"
+        f"% ----------------------------------------------------------------------------------------\n"
+    )
+
+def sync_page_comments_to_source(content_path: Path):
+    text = content_path.read_text(encoding="utf-8")
+
+    # (1) タグ付き飾り帯「だけ」を削除（DOTALL禁止、1行= [^\n]* で固定）
+    pattern_band = (
+        rf'(?m)^\s*{re.escape(BAND_TAG)}\s*\n'     # タグ行
+        rf'(?:^\s*%[^\n]*\n)+'                    # 続く % 行だけ（1行ずつ）
+    )
+    text2 = re.sub(pattern_band, '', text)
+
+    # (2) 行頭の \begin{frame} の直前にだけ挿入
+    count = 0
+    def replacer(match):
+        nonlocal count
+        count += 1
+        return f"{make_band(count)}{match.group(0)}"
+
+    new_text = re.sub(r'(?m)^\\begin\{frame\}', replacer, text2)
+
+    if text != new_text:
+        content_path.write_text(new_text, encoding="utf-8")
+        print(f"✅ ページ番号コメントを刷新しました (Total: {count} frames)")
+
 # =========================
 #  Main
 # =========================
@@ -236,6 +269,9 @@ def main() -> None:
     if not content_path.exists():
         print(f"❌ content.tex が見つかりません: {content_path}", file=sys.stderr)
         sys.exit(1)
+
+    # 1. まずソースコードにページ番号を振る
+    sync_page_comments_to_source(content_path)
 
     # page range
     try:
