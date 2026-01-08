@@ -36,8 +36,25 @@
 \usepackage{longtable}
 \usepackage{pdfpages}
 \usepackage{etoolbox} % AtBeginEnvironment 等
+\usepackage[normalem]{ulem}
 \usetikzlibrary{calc}
 \usetikzlibrary{backgrounds}
+
+\usepackage{pgf}
+
+% マーカー（ハイライター）の定義
+\newcommand{\markline}[2][yellow]{%
+  \tikz[baseline=(X.base)]{%
+    \node[inner sep=0pt,outer sep=0pt] (X) {#2};
+    \begin{scope}[on background layer]
+      \fill[#1, opacity=0.35, rounded corners=0.8pt]
+        ([xshift=-0.15em,yshift=0.00ex]X.south west) rectangle
+        ([xshift= 0.15em,yshift=2.15ex]X.south east);
+    \end{scope}
+  }%
+}
+
+
 
 % minted（※ -shell-escape 必須）
 \usepackage{minted}
@@ -51,6 +68,7 @@
 % （必要なときだけ）tcolorbox
 \usepackage[most]{tcolorbox}
 \tcbuselibrary{skins}        % 高度なデザイン機能
+\tcbuselibrary{raster}
 
 % hyperref は最後
 \usepackage{hyperref}
@@ -60,29 +78,79 @@
 \definecolor{PaleGreen}{HTML}{F1F8E9}  % 背景の薄い緑
 \definecolor{MyDarkGreen}{HTML}{587a7f}
 \definecolor{DeepText}{HTML}{1C1C1C}   % 本文の文字色
+\definecolor{MyWhiteBlue}{HTML}{F2FAFB} % 追加：あなたが指定した色
+\definecolor{BananaColor}{HTML}{FFFD78}
+
 
 % --- 2. tcolorbox のデフォルト設定（全ボックスに適用） ---
+%\tcbset{
+%    enhanced,                          % 高度な装飾を有効化
+%    colback=white,                 % 本文背景色
+%    colframe=MyDarkGreen,               % 枠線の色
+%    coltitle=white,                    % タイトル文字色
+%    fonttitle=\bfseries\sffamily,      % タイトルを太字・ゴシック
+%    boxrule=1pt,                       % 枠線の太さ
+%    arc=2mm,                           % 角の丸み
+%    left=3mm, right=3mm,               % 左右の余白
+%    top=0.5mm, bottom=0.5mm,               % 本文の上下余白
+%    toptitle=0.8mm, bottomtitle=0.5mm, % タイトル内の上下余白
+%    before skip=0.8em, after skip=0.2em,   % ボックス前後の行間
+%    shadow={0mm}{0mm}{0mm}{black!0}    % 影を完全に消してフラットに
+%}
+% --- 2. tcolorbox のデフォルト設定 ---
 \tcbset{
-    enhanced,                          % 高度な装飾を有効化
-    colback=white,                 % 本文背景色
-    colframe=MyDarkGreen,               % 枠線の色
-    coltitle=white,                    % タイトル文字色
-    fonttitle=\bfseries\sffamily,      % タイトルを太字・ゴシック
-    boxrule=1pt,                       % 枠線の太さ
-    arc=2mm,                           % 角の丸み
-    left=3mm, right=3mm,               % 左右の余白
-    top=0.5mm, bottom=0.5mm,               % 本文の上下余白
-    toptitle=0.8mm, bottomtitle=0.5mm, % タイトル内の上下余白
-    before skip=0.8em, after skip=0.2em,   % ボックス前後の行間
-    shadow={0mm}{0mm}{0mm}{black!0}    % 影を完全に消してフラットに
+    enhanced,
+    colback=MyWhiteBlue,            % 本文背景を F2FAFB に変更
+    colframe=MyDarkGreen,
+    coltitle=white,                 % タイトル文字は白（背景が濃い色の場合）
+    % coltitle=DeepText,            % もしタイトル背景も薄くするならこちら
+    fonttitle=\bfseries\sffamily\small, % タイトルを少し小さくしてスリム化
+    boxrule=0.5pt,                  % 1pt から 0.5pt へ細分化
+    arc=1mm,                        % 2mm から 1mm へ変更
+    sharp corners=south,            % 下側を直角に固定
+    % --- 余白の調整 ---
+    left=3mm, right=3mm,
+    top=0.5mm, bottom=0.5mm,
+    toptitle=0mm,                   % タイトル上の余白をゼロに
+    bottomtitle=0mm,                % タイトル下の余白をゼロに
+    % ------------------
+    before skip=0.8em, after skip=0.2em,
+    shadow={0mm}{0mm}{0mm}{black!0}
 }
 
+% --- カスタムボックスの定義 ---
+\newtcolorbox{myListbox}[1]{
+  enhanced,
+  detach title,              % 1. 標準のタイトル位置を解除
+  % 2. 本文が始まる直前（before upper）でタイトルを直接描画する
+  before upper={{\bfseries\large #1}\par\medskip},
+  % タイトルの後に改行を入れる設定
+  after title={\par\medskip},
+  colbacktitle=white, 
+  colframe=gray!50,
+  colback=white,
+  titlerule=0pt,
+  boxrule=1pt,
+  fonttitle=\bfseries\color{black},
+  title=#1,
+  after skip=1.5ex,
+  % --- 箇条書きの余白を強制的にゼロにする設定 ---
+  before upper={
+    \setbeamertemplate{itemize ispan}{0pt} % 項目間の余白
+    \setbeamertemplate{itemize items}[default]
+    \setlength{\leftmargini}{1.5em}
+    % Beamerの内部変数を直接操作して行間を詰める
+    \addtobeamertemplate{itemize/enumerate body begin}{}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  }
+}
 
 %--------------------------
 % パス
 %--------------------------
 \newcommand{\assetpath}{@@sourcedir@@}
 \graphicspath{{images/}{\assetpath/@@sdir@@/images/}{../project_assets/images/}{../project_assets/emoji/emoji_pngs/}}
+% PGFがある特定の階層を定義
+\newcommand{\pgfpath}{\assetpath/@@sdir@@/images/}
 
 %--------------------------
 % フッター

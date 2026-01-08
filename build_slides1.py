@@ -242,6 +242,107 @@ def sync_page_comments_to_source(content_path: Path):
         content_path.write_text(new_text, encoding="utf-8")
         print(f"✅ ページ番号コメントを刷新しました (Total: {count} frames)")
 
+
+
+
+BAND_TAG = "%@@PAGEBAND@@"
+
+SEP_PREFIX = "% ---"   # 罫線行はこのprefixで判定（長さは問わない）
+PAGE_RE = re.compile(r"^\s*%\s*page\s*\d+\s*$", re.IGNORECASE)
+
+def make_band_block(n: int) -> list[str]:
+    return [
+        f"{BAND_TAG}\n",
+        "% ----------------------------------------------------------------------------------------\n",
+        f"%   page {n:02d}\n",
+        "% ----------------------------------------------------------------------------------------\n",
+    ]
+
+def is_blank(line: str) -> bool:
+    return line.strip() == ""
+
+def is_comment(line: str) -> bool:
+    return line.lstrip().startswith("%")
+
+def is_sep(line: str) -> bool:
+    return line.strip().startswith(SEP_PREFIX)
+
+def is_page(line: str) -> bool:
+    return PAGE_RE.match(line.strip()) is not None
+
+def is_bandish(line: str) -> bool:
+    s = line.strip()
+    return (s == BAND_TAG) or is_sep(line) or is_page(line)
+
+def extract_prev_block(out_lines: list[str]) -> list[str]:
+    """
+    out_lines の末尾から、空行/コメントだけで構成される「直前ブロック」を取り出す。
+    取り出した分は out_lines から削除し、ブロック（元順）を返す。
+    """
+    prev = []
+    while out_lines and (is_blank(out_lines[-1]) or is_comment(out_lines[-1])):
+        prev.append(out_lines.pop())
+    prev.reverse()
+    return prev
+
+def remove_all_bands_from_prev_block(prev_block: list[str]) -> list[str]:
+    """
+    直前ブロックから「帯っぽい塊」をすべて除去する。
+    - タグ有無に関係なく、bandish行（TAG/SEP/PAGE）を含む連続領域を削除
+    - ただし、他のコメントは残す
+    """
+    cleaned = []
+    i = 0
+    n = len(prev_block)
+
+    while i < n:
+        line = prev_block[i]
+
+        # bandish の開始点を見つけたら、その塊をスキップ
+        if is_bandish(line):
+            i += 1
+            # bandish と空行が続く間は全部飛ばす
+            while i < n and (is_bandish(prev_block[i]) or is_blank(prev_block[i])):
+                i += 1
+            # ここで塊終了
+            continue
+
+        # bandishでなければそのまま保持
+        cleaned.append(line)
+        i += 1
+
+    return cleaned
+
+def normalize_pageband_per_frame(tex_path: Path):
+    text = tex_path.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+
+    out = []
+    page = 0
+
+    for line in lines:
+        if line.lstrip().startswith(r"\begin{frame}"):
+            # 直前ブロックを取り出し、そこから帯だけ消す
+            prev = extract_prev_block(out)
+            prev = remove_all_bands_from_prev_block(prev)
+
+            # 帯以外のコメント/空行は戻す
+            out.extend(prev)
+
+            # このframe用の帯を「必ず1個」入れる
+            page += 1
+            out.extend(make_band_block(page))
+
+            # frame本体
+            out.append(line)
+        else:
+            out.append(line)
+
+    new_text = "".join(out)
+    tex_path.write_text(new_text, encoding="utf-8")
+    print(f"✅ 帯を正規化しました（frames={page}、増殖しません）")
+
+
 # =========================
 #  Main
 # =========================
@@ -272,6 +373,7 @@ def main() -> None:
 
     # 1. まずソースコードにページ番号を振る
     sync_page_comments_to_source(content_path)
+    #sync_page_comments_to_source(content_path)
 
     # page range
     try:
