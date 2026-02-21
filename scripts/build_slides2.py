@@ -365,7 +365,8 @@ def main() -> None:
         print("❌ 対象ディレクトリが解決できません", file=sys.stderr)
         sys.exit(1)
 
-    root = Path(__file__).parent  # build_slide/
+#    root = Path(__file__).parent  # build_slide/
+    root = Path(__file__).parent.parent  # build_slide/
     sourcedir_text = slideinfo.getsourcedir()
     app_dir = Path(sourcedir_text) / tagdir
     content_path = app_dir / "content.tex"

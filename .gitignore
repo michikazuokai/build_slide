@@ -30,6 +30,7 @@ Thumbs.db
 
 # --- Artifacts / Temp ---------------------------------------
 # スクリプト等で一時的に生成される画像やログ
+sandbox/
 output.png
 output_with_line.png
 screenshot.py.log

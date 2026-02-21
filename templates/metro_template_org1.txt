@@ -25,6 +25,7 @@
 %--------------------------
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
+\usepackage[absolute,overlay]{textpos}
 \usepackage[abs]{overpic}
 \usepackage{tikz}
 \usetikzlibrary{positioning, shapes.geometric} % ← shapes.geometric を追加
@@ -160,7 +161,8 @@
   \leavevmode
   \hbox to \paperwidth{%
     \hspace*{0.2cm}
-    \scriptsize\color{gray!50} \myfootertext
+	@@leftfooter@@
+%%%   \scriptsize\color{gray!50} \myfootertext
     \hfill
     \scriptsize\color{gray} \insertframenumber{} / \inserttotalframenumber
     \hspace*{0.4cm}

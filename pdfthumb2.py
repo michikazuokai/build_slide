@@ -132,7 +132,7 @@ if __name__ == "__main__":
     if is_tech:
         src_name = f"{tdir_name}_{title}_tech.pdf"
     else:
-        src_name = f"{tdir_name}_{title}_pr.pdf"
+        src_name = f"{tdir_name}_{title}.pdf"
     src_pdf = base_dir / src_name
 
     out_pdf = base_dir / f"{tdir_name}_{title}_thumbsheet_A4_{4}x{6}.pdf"
