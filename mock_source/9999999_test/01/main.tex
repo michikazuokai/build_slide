@@ -1,0 +1,51 @@
+%----------------------------------------------------------------------------------------
+% main_template_org1.tex (統合テンプレート)
+%----------------------------------------------------------------------------------------
+\documentclass[aspectratio=169]{beamer}
+
+% 1. 基本設定とパッケージ
+\input{preamble.tex}
+
+% 2. 独自マクロとロジック（パス定義などを含む）
+\input{macros.tex}
+
+% 3. デザインとスタイル（Beamerテーマ・カラー設定）
+\input{styles.tex}
+
+% --- タイトル・基本情報 ---
+\title{ これはテストです }
+\date{}
+
+\begin{document}
+
+% --- 表紙（フレーム番号にはカウントしない） ---
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+  \bigskip
+  \begin{center}
+    \ifteachermode 教師用 \fi
+  \end{center}
+\end{frame}
+
+% --- 本編開始の準備 ---
+% フレーム番号をここから 1 (または0) にリセット
+\setcounter{framenumber}{0} 
+
+% --- 本編 (Pythonにより抽出された frame 群が挿入される) ---
+% @@@--(metropolis)--@@@
+
+%@@PAGEBAND@@
+% ----------------------------------------------------------------------------------------
+%   page 01
+% ----------------------------------------------------------------------------------------
+\begin{frame}{テスト環境のビルド}
+  ディレクトリ構成とテンプレート分割のテストです。
+  \begin{itemize}
+    \item scripts フォルダからの実行
+    \item slideinfo/slideinfo.yaml の更新
+	\item \emjpin 構造体の基本：構造体の定義と宣言
+  \end{itemize}
+  \includegraphics[scale=0.5]{構造体解説.png}
+\end{frame}
+
+\end{document}

@@ -75,10 +75,11 @@ def slidetitle(subject, course):
     
     # 科目のベースディレクトリを取得
     base_pt = Path(_get_required_key(year_conf, "dir", "共通ディレクトリ設定"))
-    subject_rel_path = _get_required_key(year_conf, subject, f"科目コード({subject})")
+
+    subject_dir = _get_required_key(year_conf, subject, f"科目設定({subject})")
     
     # 科目別設定ファイルのパス
-    info_path = base_pt / subject_rel_path / "slideinfo" / "slideinfo.yaml"
+    info_path = base_pt / subject_dir / "slideinfo" / "slideinfo.yaml"
     
     # 科目別設定の読み込み
     conf = _load_yaml(info_path)
@@ -94,11 +95,11 @@ def slideinfoupdate(subject, course):
     year_conf = _get_required_key(sdic, fsyear, f"年度設定({fsyear})")
     
     base_pt = Path(_get_required_key(year_conf, "dir", "共通ディレクトリ設定"))
-    subject_rel_path = _get_required_key(year_conf, subject, f"科目コード({subject})")
     
     # 科目別設定ファイルのフルパスを構築
+    subject_dir = _get_required_key(year_conf, subject, f"科目設定({subject})")
     # (あなたのフォルダ構成に合わせて /slideinfo/slideinfo.yaml を指定)
-    info_path = base_pt / subject_rel_path / "slideinfo" / "slideinfo.yaml"
+    info_path = base_pt / subject_dir / "slideinfo" / "slideinfo.yaml"
     
     # 2. 「台帳(科目別のslideinfo.yaml)」を読み込む
     conf = _load_yaml(info_path)
@@ -108,11 +109,13 @@ def slideinfoupdate(subject, course):
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     count = course_data.get('count', 0)
     
-    if count > 0:
-        course_data['update_at'] = dt
-    else:
-        # 初回ビルドの場合
+    # get()で値を取得し、それが「空（None, '', 0等）」かどうかを判定
+    if not course_data.get('created_at'):
+        # キーがない、または中身が空文字 '' の場合はこちら
         course_data['created_at'] = dt
+    else:
+        # すでに何らかの文字列が入っている場合はこちら
+        course_data['update_at'] = dt
     
     course_data['count'] = count + 1
     
@@ -129,6 +132,7 @@ if __name__ == '__main__':
     try:
         print("--- Source Dir ---")
         print(getsourcedir())
+        print(slidetitle("1020701", "02"))
         print("\n--- Slide Dir ---")
         # 実際の値に合わせてテストしてください
         # print(slidedir('1020701', '02'))

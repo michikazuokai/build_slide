@@ -1,0 +1,161 @@
+%----------------------------------------------------------------------------------------
+% styles.tex: テーマ・カラー・レイアウト・装飾の設定
+%----------------------------------------------------------------------------------------
+
+% --- 1. Metropolis テーマの基本設定 ---
+\usetheme{metropolis}
+\metroset{block=fill, sectionpage=progressbar, progressbar=foot}
+
+% 背景色（tech のとき白など）: Python (build_slides2.py) で差し込み 
+\setbeamercolor{background canvas}{bg=white}
+
+
+% --- 2. カラーパレットの定義  ---
+\definecolor{CanvaGreen}{HTML}{2E7D32}   % メインの濃い緑
+\definecolor{PaleGreen}{HTML}{F1F8E9}    % 背景の薄い緑
+\definecolor{MyDarkGreen}{HTML}{587a7f}  % 枠線用
+\definecolor{DeepText}{HTML}{1C1C1C}     % 本文文字色
+\definecolor{MyWhiteBlue}{HTML}{F2FAFB}  % ボックス背景用
+\definecolor{BananaColor}{HTML}{FFFD78}  % アクセント
+\definecolor{myblue}{HTML}{7488FF}       % 標準ブロック用
+\definecolor{mylightblue}{HTML}{E3EEFF}  % 標準ブロック背景用
+
+
+% --- 3. Beamer 各種テンプレートの再定義  ---
+
+% フッター設定（\scriptsize\color{gray!50} \myfootertext は Python で置換）
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox to \paperwidth{%
+    \hspace*{0.2cm}%
+    \scriptsize\color{gray!50} \myfootertext%
+    \hfill%
+    \scriptsize\color{gray} \insertframenumber{} / \inserttotalframenumber%
+    \hspace*{0.4cm}%
+  }%
+  \vspace{1pt}%
+}
+
+% フレームタイトル設定 (番号. タイトル)
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6ex}%
+  \begin{beamercolorbox}[wd=\paperwidth,sep=0.5ex,leftskip=0.9em,rightskip=0.5em]{frametitle}%
+    \usebeamerfont{frametitle}%
+    \insertframenumber.\,\insertframetitle%
+  \end{beamercolorbox}%
+}
+
+% セクションページのデザイン
+\setbeamerfont{section title}{size=\LARGE,series=\bfseries}
+\setbeamertemplate{section page}{
+  \begin{centering}
+    \vfill
+    \rule{\linewidth}{2pt}\par
+    \vspace{1ex}
+    {\usebeamerfont{section title}\Huge\bfseries \insertsection}\par
+    \vspace{1ex}
+    \rule{\linewidth}{2pt}\par
+    \vfill
+  \end{centering}
+}
+
+% --- セクションページの自動挿入設定（動作の定義） ---
+% \section{...} が使われるたびに、自動的に中扉スライドを挿入します
+\AtBeginSection[]{
+  \begin{frame}[plain,noframenumbering]
+    \sectionpage
+  \end{frame}
+}
+
+% --- 4. tcolorbox のデフォルト設定とカスタムボックス  ---
+
+\tcbset{
+    enhanced,
+    colback=MyWhiteBlue,
+    colframe=MyDarkGreen,
+    coltitle=white,
+    fonttitle=\bfseries\sffamily\small,
+    boxrule=0.5pt,
+    arc=1mm,
+    sharp corners=south,
+    left=3mm, right=3mm,
+    top=0.5mm, bottom=0.5mm,
+    toptitle=0mm,
+    bottomtitle=0mm,
+    before skip=0.8em, after skip=0.2em,
+    shadow={0mm}{0mm}{0mm}{black!0}
+}
+
+% 箇条書き用カスタムボックス
+\newtcolorbox{myListbox}[1]{
+  enhanced,
+  detach title,
+  before upper={{\bfseries\large #1}\par\medskip},
+  colbacktitle=white, 
+  colframe=gray!50,
+  colback=white,
+  boxrule=1pt,
+  fonttitle=\bfseries\color{black},
+  title=#1,
+  after skip=1.5ex,
+  % 内部の箇条書き余白調整
+  before upper={
+    \setbeamertemplate{itemize ispan}{0pt}
+    \setbeamertemplate{itemize items}[default]
+    \setlength{\leftmargini}{1.5em}
+    \addtobeamertemplate{itemize/enumerate body begin}{}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  }
+}
+
+
+% --- 5. 標準ブロック・exampleblock の調整  ---
+
+\setbeamertemplate{blocks}[rounded]
+\setbeamercolor{block title}{bg=myblue, fg=white}
+\setbeamercolor{block body}{bg=mylightblue, fg=black}
+
+% exampleblock 専用設定（タイトル白、本文黒、itemize色固定）
+\setbeamercolor{block title example}{fg=white}
+\setbeamercolor{block body example}{fg=black}
+
+\AtBeginEnvironment{exampleblock}{%
+  \setbeamercolor{itemize item}{fg=black}
+  \setbeamercolor{itemize subitem}{fg=black}
+  \setbeamercolor{item}{fg=black}
+}
+
+
+% --- 6. その他スタイル調整（表の列型など）  ---
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\raggedright\arraybackslash}m{#1}}
+
+
+% --- 7. モード切替フラグ（Pythonからの差し込み）  ---
+\mypausemodetrue
+\teachermodetrue
+\setbeameroption{show notes}
+
+\makeatletter
+\renewcommand{\noteT}[2]{%
+ \gdef\notetitletext{#1}%
+ \note{#2}%
+}
+\renewcommand{\notetitletext}{}%
+\setbeamertemplate{note page}{%
+ \begin{minipage}{\linewidth}
+ \vspace{1.2ex}
+ {\Large\bfseries
+ \ifx\notetitletext\@empty
+ \insertframetitle
+ \else
+ \notetitletext
+ \fi
+ }\par
+ \vspace{-1.2ex}
+ \rule{\linewidth}{0.8pt}\par
+ \vspace{0.8ex}
+ {\scriptsize \insertnote}
+ \end{minipage}
+}
+\makeatother
+\oddslideenforcetrue

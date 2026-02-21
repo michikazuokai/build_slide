@@ -1,0 +1,37 @@
+%----------------------------------------------------------------------------------------
+% main_template_org1.tex (統合テンプレート)
+%----------------------------------------------------------------------------------------
+%@@notesdocumentmode@@
+
+% 1. 基本設定とパッケージ
+\input{preamble.tex}
+
+% 2. 独自マクロとロジック（パス定義などを含む）
+\input{macros.tex}
+
+% 3. デザインとスタイル（Beamerテーマ・カラー設定）
+\input{styles.tex}
+
+% --- タイトル・基本情報 ---
+\title{ @@stitle@@ }
+\date{}
+
+\begin{document}
+
+% --- 表紙（フレーム番号にはカウントしない） ---
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+  \bigskip
+  \begin{center}
+    \ifteachermode 教師用 \fi
+  \end{center}
+\end{frame}
+
+% --- 本編開始の準備 ---
+% フレーム番号をここから 1 (または0) にリセット
+\setcounter{framenumber}{0} 
+
+% --- 本編 (Pythonにより抽出された frame 群が挿入される) ---
+@@BODY@@
+
+\end{document}
