@@ -9,40 +9,7 @@ import shutil
 import sys
 import time
 import os
-import slideinfo  # slidedir(), slidetitle(), slideinfoupdate(), getsourcedir()
-
-# =========================
-#  Notes 注入コード
-# =========================
-
-NOTES_CMD_OFF = r"""\providecommand{\noteT}[2]{} % noteT を無視"""
-
-NOTES_CMD_TECH = r"""
-\makeatletter
-\renewcommand{\noteT}[2]{%
- \gdef\notetitletext{#1}%
- \note{#2}%
-}
-\renewcommand{\notetitletext}{}%
-\setbeamertemplate{note page}{%
- \begin{minipage}{\linewidth}
- \vspace{1.2ex}
- {\Large\bfseries
- \ifx\notetitletext\@empty
- \insertframetitle
- \else
- \notetitletext
- \fi
- }\par
- \vspace{-1.2ex}
- \rule{\linewidth}{0.8pt}\par
- \vspace{0.8ex}
- {\scriptsize \insertnote}
- \end{minipage}
-}
-\makeatother
-\oddslideenforcetrue
-"""
+import slideinfo  
 
 # =========================
 #  Utility
@@ -86,7 +53,7 @@ def run_latexmk(build_dir: Path, main_tex: Path, timeout_s: int = 360) -> None:
     print(f"latexコンパイル時間: {time.perf_counter() - start:.3f}秒")
     if res.returncode != 0:
         print("❌ LaTeX コンパイル失敗", file=sys.stderr); sys.exit(1)
-    print("✅ LaTeX コンパイル成功")
+    print("🙆‍♀️ LaTeX コンパイル成功")
 
 def find_frame_positions(tex: str) -> list[tuple[int, int]]:
     pattern = re.compile(r"(\\begin\{frame\}(?:\[[^\]]*\])?(?:\{.*?\})?.*?\\end\{frame\})", flags=re.DOTALL)
@@ -98,17 +65,31 @@ def extract_frames(tex: str, fp: int, tp: int) -> str:
     fp, tp = max(1, fp), min(tp, len(pos))
     return "\n\n".join([tex[pos[i-1][0]:pos[i-1][1]] for i in range(fp, tp+1)])
 
-def apply_modes_to_template(content: str, *, ho: bool, tech: bool) -> str:
+def apply_modes_to_template(content: str, *, ho: bool, tech: bool, tdir_name: str, left_footer: str = "") -> str:
+    # --- パス計算（絶対パス） ---
+    # scripts フォルダの1つ上がツールのルート
+    root = Path(__file__).parent.parent
+    tool_img_dir = (root / "project_assets" / "images").absolute()
+    emoji_img_dir = (root / "project_assets" / "emoji" / "emoji_pngs").absolute()
+    sourcedir_text = slideinfo.getsourcedir()
+
+    # --- 1. 定数・パス系の置換 ---
+    content = content.replace("@@sdir@@", safe_tex_path(tdir_name))
+    content = content.replace("@@sourcedir@@", safe_tex_path(sourcedir_text))
+    content = content.replace("@@tool_img@@", str(tool_img_dir))
+    content = content.replace("@@emoji_img@@", str(emoji_img_dir))
+    content = content.replace("@@leftfooter@@", left_footer)
+
+    # --- 2. モード（スイッチ）系の置換 ---
     content = content.replace("%@@pausemode@@", r"\mypausemodefalse" if ho else r"\mypausemodetrue")
     content = content.replace("%@@teachermode@@", r"\teachermodetrue" if tech else r"\teachermodefalse")
+    
+    # ノート出力・ドキュメントクラス制御
     if tech:
         content = content.replace("%@@notesdocumentmode@@", r"\documentclass[handout,aspectratio=169]{beamer}")
-        content = content.replace("%@@notesmode@@", r"\setbeameroption{show notes}")
-        content = content.replace("%@@notesmode_tech@@", NOTES_CMD_TECH)
     else:
         content = content.replace("%@@notesdocumentmode@@", r"\documentclass[aspectratio=169]{beamer}")
-        content = content.replace("%@@notesmode@@", "")
-        content = content.replace("%@@notesmode_tech@@", NOTES_CMD_OFF)
+
     return content
 
 def sync_page_comments_to_source(content_path: Path):
@@ -190,8 +171,8 @@ def main() -> None:
     sdir_tex = safe_tex_path(tagdir)
     l_footer_content = "" if args.hidefooter else r"\scriptsize\color{gray!50} \myfootertext"
 
-    # ビルドディレクトリ作成（サブファイル書き込み前に必要）
-    build_dir = root / "build"
+    # ビルドディレクトリ作成（各講義データフォルダの直下に作成）
+    build_dir = app_dir / "build"
     build_dir.mkdir(exist_ok=True)
 
     # 2. テンプレート読み込みと置換
@@ -207,7 +188,7 @@ def main() -> None:
 
     # 親テンプレートの処理
     templ_raw = templ_file.read_text(encoding="utf-8")
-    tex_main = apply_modes_to_template(templ_raw, ho=args.ho, tech=args.tech)
+    tex_main = apply_modes_to_template(templ_raw, ho=args.ho, tech=args.tech, tdir_name=tdir_name, left_footer=l_footer_content)
     tex_main = tex_main.replace("@@stitle@@", stitle)
 
     # サブファイルの処理
@@ -216,14 +197,13 @@ def main() -> None:
         sub_path = root / "templates" / sub_name
         if not sub_path.exists(): continue
         sub_c = sub_path.read_text(encoding="utf-8")
-        sub_c = sub_c.replace("@@sdir@@", sdir_tex).replace("@@sourcedir@@", safe_tex_path(sourcedir_text)).replace("@@leftfooter@@", l_footer_content)
         
         if args.tech:
             sub_c = sub_c.replace("%@@setbeamcolor@@", r"\setbeamercolor{background canvas}{bg=white}")
         else:
             sub_c = sub_c.replace("%@@setbeamcolor@@", "")
         
-        sub_c = apply_modes_to_template(sub_c, ho=args.ho, tech=args.tech)
+        sub_c = apply_modes_to_template(sub_c, ho=args.ho, tech=args.tech, tdir_name=tdir_name, left_footer=l_footer_content)
         (build_dir / sub_name).write_text(sub_c, encoding="utf-8")
 
     print("✅ プリアンブル作成（サブファイルの配備完了）")
@@ -241,25 +221,20 @@ def main() -> None:
     main_tex = build_dir / "main.tex"
     main_tex.write_text(final_tex, encoding="utf-8")
 
-
-    # out_lines = [tex_main, "", body]
-    # if not body.strip().endswith(r"\end{document}"):
-    #     out_lines.append(r"\end{document}")
-    
-    # main_tex = build_dir / "main.tex"
-    # main_tex.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
-    
-    try: shutil.copy2(main_tex, app_dir / "main.tex")
-    except: pass
-
     # 5. 実行とコピー
     run_latexmk(build_dir, main_tex)
-    
+
+    # PDFのファイル名を作成
     stem = f"{tdir_name}_{stitle}{suffix_tag if suffix_tag else ('_tech' if args.tech else ('_pr' if not args.ho else ''))}"
-    final_pdf = app_dir / f"{stem}.pdf"
-    shutil.copy2(build_dir / "main.pdf", final_pdf)
+    final_pdf = app_dir / f"{stem}.pdf" # 保存先は講義フォルダ直下
     
-    print("✅ 出力:", final_pdf)
+    # build/main.pdf を app_dir/XXX.pdf へ移動（またはコピー）
+    if (build_dir / "main.pdf").exists():
+        shutil.copy2(build_dir / "main.pdf", final_pdf)
+        print("📝 出力:", final_pdf)
+    else:
+        print("❌ PDFが生成されませんでした。build/main.log を確認してください。")
+
     slideinfo.slideinfoupdate(subj_code, tdir_name)
 
 if __name__ == "__main__":

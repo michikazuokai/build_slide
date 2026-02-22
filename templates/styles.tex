@@ -132,6 +132,39 @@
 
 % --- 7. モード切替フラグ（Pythonからの差し込み）  ---
 %@@pausemode@@
+%  @@teachermode@@
+%%  % @@notesmode@@
+%%  % @@notesmode_tech@@
+
+
+% --- ノート・教師用メモの制御 ---
+\newif\ifteachermode % (もし定義されていなければ)
 %@@teachermode@@
-%@@notesmode@@
-%@@notesmode_tech@@
+
+\ifteachermode
+    % 教師用モード：ノートを表示し、詳細なレイアウトを定義
+    \setbeameroption{show notes}
+    \makeatletter
+    \renewcommand{\noteT}[2]{%
+        \gdef\notetitletext{#1}%
+        \note{#2}%
+    }
+    \renewcommand{\notetitletext}{}%
+    \setbeamertemplate{note page}{%
+        \begin{minipage}{\linewidth}
+        \vspace{1.2ex}
+        {\Large\bfseries
+        \ifx\notetitletext\@empty \insertframetitle \else \notetitletext \fi
+        }\par
+        \vspace{-1.2ex}
+        \rule{\linewidth}{0.8pt}\par
+        \vspace{0.8ex}
+        {\scriptsize \insertnote}
+        \end{minipage}
+    }
+    \makeatother
+    \oddslideenforcetrue
+\else
+    % 通常・配布用モード：noteT を完全に無視
+    \providecommand{\noteT}[2]{}
+\fi

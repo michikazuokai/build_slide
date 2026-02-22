@@ -9,13 +9,9 @@ _minted*/
 
 # --- build ディレクトリの制御 ----------------------------------
 # 一旦すべてを無視
-build/*
+_build/*
 
-# .tex ファイルだけは管理対象に戻す（! は否定）
-!build/*.tex
 
-# ただし、main.tex は不要なので除外
-build/main.tex
 
 # --- Security (絶対公開禁止) ----------------------------------
 # SSH秘密鍵・公開鍵
@@ -32,6 +28,7 @@ Thumbs.db
 # スクリプト等で一時的に生成される画像やログ
 sandbox/
 _archives/
+mock_source/
 output.png
 output_with_line.png
 screenshot.py.log
