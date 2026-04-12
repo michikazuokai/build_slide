@@ -30,13 +30,28 @@
 \usepackage{pgf} 
 
 % --- コード表示 (minted) ---
+% \usepackage{minted} 
+% \setminted{ 
+%   frame=single, 
+%   framesep=2mm, 
+%   fontsize=\footnotesize, 
+%   breaklines=true 
+% } 
+% --- コード表示 (minted) ---
+% オプションとして直接 executable を渡す
 \usepackage{minted} 
+\makeatletter
+% v3の新しいプロセスを使わず、直接 pygmentize を探すように強制する
+%\setminted{newfloat=false} 
+\makeatother
+
 \setminted{ 
   frame=single, 
   framesep=2mm, 
   fontsize=\footnotesize, 
   breaklines=true 
-} 
+}
+
 
 % --- 装飾ボックス (tcolorbox) ---
 \usepackage[most]{tcolorbox} 

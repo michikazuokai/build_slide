@@ -59,6 +59,7 @@ emoji_list = [
     ("🙌", "banzai"),
     ("⚫️", "dotblack"),
     ("●", "dotblackS"),
+    ("🧑‍🤝‍🧑","groupb"),
     ]
 
 # スクリプト自身の親ディレクトリを取得

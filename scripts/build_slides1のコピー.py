@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # build_slides.py — Beamer スライド部分抽出 & latexmk ビルド（分割テンプレート対応版）
 from __future__ import annotations
 
@@ -54,10 +52,7 @@ def run_latexmk(build_dir: Path, main_tex: Path, timeout_s: int = 360) -> None:
     
     print(f"latexコンパイル時間: {time.perf_counter() - start:.3f}秒")
     if res.returncode != 0:
-        print("❌ LaTeX コンパイル失敗", file=sys.stderr)
-        print(f"📂 中間ファイルとログはこちらを確認してください:")
-        print(f"   open {build_dir}")
-        sys.exit(1)
+        print("❌ LaTeX コンパイル失敗", file=sys.stderr); sys.exit(1)
     print("🙆‍♀️ LaTeX コンパイル成功")
 
 def find_frame_positions(tex: str) -> list[tuple[int, int]]:
@@ -113,7 +108,7 @@ def sync_page_comments_to_source(content_path: Path):
 #  引数表示
 # =========================
 def display_build_config(subj_code: str, tdir_name: str, tagdir: str, stitle: str, 
-                         args: argparse.Namespace, ctheme: str, content_path: Path, build_dir: Path):
+                         args: argparse.Namespace, ctheme: str, content_path: Path):
     """実行前に現在のビルド設定を一覧表示する"""
     
     # タイトルの取得元を判定
@@ -143,7 +138,6 @@ def display_build_config(subj_code: str, tdir_name: str, tagdir: str, stitle: st
     print(f"  ■ Beamerテーマ  : {ctheme}")
     print(f"  ■ 左フッター    : {'[非表示]' if args.hidefooter else '[表示]'}")
     print(f"  ■ ソースファイル: {content_path}")
-    print(f"  ■ 中間ファイル  : {build_dir}")
     print("=" * 65 + "\n")
 
 # =========================
@@ -158,7 +152,6 @@ def main() -> None:
     ap.add_argument("--tech", action="store_true")
     ap.add_argument("--hidefooter", action="store_true")
     ap.add_argument("--title", default=None)
-    ap.add_argument("--save", action="store_true", help="講義フォルダ内のbuildディレクトリに中間ファイル保存する")
     args = ap.parse_args()
 
     subj_code, tdir_name = args.items
@@ -174,59 +167,48 @@ def main() -> None:
     # 1. 前準備
     sync_page_comments_to_source(content_path)
     fp, tp = parse_page_range(args.page)
+    # stitle = args.title if args.title else slideinfo.slidetitle(subj_code, tdir_name)
+    # sdir_tex = safe_tex_path(tagdir)
 
-    # Title handling (B仕様):
-    #  - --title 指定時：その文字列のみ表示（番号なし）
-    #  - 未指定時：<tdir>_<YAML title> を表示
+    # ---- 表示用タイトル（表紙/フッター）を作る：B仕様 ----
     yaml_title = slideinfo.slidetitle(subj_code, tdir_name)
     raw_title = args.title if args.title else yaml_title
-
+    
     def tex_escape(s: str) -> str:
-        # Minimal LaTeX escaping for titles/footer
+        # 最小限：LaTeXで "_" は特殊文字なのでエスケープ
         return s.replace("\\", r"\textbackslash ").replace("_", r"\_")
-
+    
+    # 表示タイトル：
+    #  - 引数指定なら「XXXXのみ」
+    #  - 引数なしなら「02_タイトル」
     display_title = raw_title if args.title else f"{tdir_name}_{raw_title}"
     display_title_tex = tex_escape(display_title)
 
-    # stitle is kept for filenames/logs (raw, no prefix)
+    # stitle は従来通り（ログ表示やPDF名生成に使う想定）
     stitle = raw_title
-
-    sdir_tex = safe_tex_path(tagdir)
-
-    # Footer shows the same text as cover title (unless hidden)
-    l_footer_content = "" if args.hidefooter else rf"\scriptsize\color{{gray!50}} {display_title_tex}"
     
-    # ビルドディレクトリの決定（saveなら各講義データフォルダの直下に作成）
-    if args.save:
-    # 従来通り QNAP 上の build フォルダを使用
-        build_dir = app_dir / "build"
-        # print(f"📁 QNAP Build Mode: {build_dir}")
-    else:
-    # MacのローカルSSD (/tmp) を使用。科目名や回数を含めて衝突を避ける
-        build_dir = Path("/tmp") / "latex_build" / subj_code / tdir_name
-        if build_dir.exists():
-            shutil.rmtree(build_dir)
+    # LaTeX用に "_" をエスケープ
+    def tex_escape(s: str) -> str:
+        return s.replace("\\", r"\textbackslash ").replace("_", r"\_")
+    
+    footer_text = f"{tdir_name}_{stitle}"          # 例: 02_Git導入：目的＋インストール
+    footer_text = tex_escape(footer_text)
+    
+    l_footer_content = "" if args.hidefooter else rf"\scriptsize\color{{gray!50}} {footer_text}"
+    #  l_footer_content = "" if args.hidefooter else r"\scriptsize\color{gray!50} \myfootertext"
 
-        # print(f"🛩️ Local Build Mode: {build_dir}")
-        
-    build_dir.mkdir(parents=True, exist_ok=True)
 
-    # 画像フォルダを /tmp 側にコピー
-    src_images = app_dir / "images"
-    dst_images = build_dir / "images"
 
-    if src_images.exists() and src_images.is_dir():
-        shutil.copytree(src_images, dst_images, dirs_exist_ok=True)
-        print(f"✅ images copied: {src_images} -> {dst_images}")
-    else:
-        print(f"⚠️ images folder not found: {src_images}")
+    # ビルドディレクトリ作成（各講義データフォルダの直下に作成）
+    build_dir = app_dir / "build"
+    build_dir.mkdir(exist_ok=True)
 
     # 2. テンプレート読み込みと置換
     text2 = content_path.read_text(encoding="utf-8")
     ctheme = theme_from_first_line(text2.splitlines()[0] if text2 else "")
 
     # 引数の表示
-    display_build_config(subj_code, tdir_name, tagdir, stitle, args, ctheme, content_path, build_dir)
+    display_build_config(subj_code, tdir_name, tagdir, stitle, args, ctheme, content_path)
     
     templ_map = {"SimpleDarkBlue": "main_template_org1.tex", "metropolis": "main_template_org1.tex"}
     templ_file = root / "templates" / templ_map[ctheme]
@@ -235,7 +217,13 @@ def main() -> None:
     # 親テンプレートの処理
     templ_raw = templ_file.read_text(encoding="utf-8")
     tex_main = apply_modes_to_template(templ_raw, ho=args.ho, tech=args.tech, tdir_name=tdir_name, left_footer=l_footer_content)
-    tex_main = tex_main.replace("@@stitle@@", display_title_tex)
+    def tex_escape(s: str) -> str:
+        # 最小限：LaTeXで "_" は特殊文字なのでエスケープ
+        return s.replace("\\", r"\textbackslash ").replace("_", r"\_")
+    
+    display_title = tex_escape(f"{tdir_name}_{stitle}")   # 例: 02_Git導入：目的＋インストール    
+    tex_main = tex_main.replace("@@stitle@@", display_title)
+
     # サブファイルの処理
     sub_files = ["preamble.tex", "macros.tex", "styles.tex", "emoji_macros.tex", "grid_debug.tex","teacherframe.sty"]
     for sub_name in sub_files:
