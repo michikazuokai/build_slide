@@ -19,7 +19,7 @@
 \definecolor{BananaColor}{HTML}{FFFD78}  % アクセント
 \definecolor{myblue}{HTML}{7488FF}       % 標準ブロック用
 \definecolor{mylightblue}{HTML}{E3EEFF}  % 標準ブロック背景用
-
+\definecolor{myblack}{rgb}{0.1, 0.1, 0.1} % 真っ黒すぎない黒を定義
 
 % --- 3. Beamer 各種テンプレートの再定義  ---
 
@@ -127,6 +127,16 @@
 % 例：alertblock のタイトルと本文の色をカスタムする
 \setbeamercolor{block title alerted}{bg=red!70, fg=white} % タイトル（背景:濃い赤, 文字:白）
 \setbeamercolor{block body alerted}{bg=red!10, fg=black}  % 本文（背景:薄い赤, 文字:黒）
+
+% --- itemize / enumerate の余白調整 ---
+% 見出し行の直後に itemize を置いたときの空きを小さくする
+\makeatletter
+\addtobeamertemplate{itemize/enumerate body begin}{%
+  \vspace{-1.8em}%
+  \setlength{\itemsep}{0.2em}%
+  \setlength{\parskip}{0pt}%
+}{}
+\makeatother
 
 % --- 6. その他スタイル調整（表の列型など）  ---
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}

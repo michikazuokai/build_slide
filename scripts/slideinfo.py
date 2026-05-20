@@ -1,140 +1,228 @@
+# /Volumes/NBPlan/TTC/build_slide/scripts/slideinfo.py
+from __future__ import annotations
+
 import sys
-from datetime import datetime
 from pathlib import Path
-from ruamel.yaml import YAML
+from datetime import datetime
+from typing import Any
 
-# YAML オブジェクトの設定
-yaml = YAML()
-yaml.preserve_quotes = True
-yaml.indent(mapping=2, sequence=4, offset=2)
 
-# ルートパスの設定
-BUILD_SLIDE_ROOT = Path(__file__).parent.parent
-DIRINFO_PATH = BUILD_SLIDE_ROOT / "dirinfo" / "dirinfo.yaml"
+# ============================================================
+# Path settings
+# ============================================================
 
-def _exit_with_error(message: str):
-    """エラーメッセージを表示して終了するヘルパー"""
+# このファイル:
+# /Volumes/NBPlan/TTC/build_slide/scripts/slideinfo.py
+#
+# parent        = /Volumes/NBPlan/TTC/build_slide/scripts
+# parent.parent = /Volumes/NBPlan/TTC/build_slide
+# parent.parent.parent = /Volumes/NBPlan/TTC
+
+BUILD_SLIDE_ROOT = Path(__file__).resolve().parent.parent
+TTC_ROOT = BUILD_SLIDE_ROOT.parent
+
+COMMON_UTIL_DIR = TTC_ROOT / "@TTC" / "util"
+
+if str(COMMON_UTIL_DIR) not in sys.path:
+    sys.path.insert(0, str(COMMON_UTIL_DIR))
+
+
+try:
+    from utils import (
+        get_current_fsyear,
+        get_source_root,
+        get_lesson_relative_dir,
+        get_lesson_title,
+        load_slideinfo_by_subno,
+        save_slideinfo,
+        get_required_key,
+    )
+except ImportError as e:
+    print("❌ @TTC/util/utils.py の読み込みに失敗しました。", file=sys.stderr)
+    print(f"   COMMON_UTIL_DIR: {COMMON_UTIL_DIR}", file=sys.stderr)
+    print(f"   error: {e}", file=sys.stderr)
+    sys.exit(1)
+
+
+# ============================================================
+# Error helper
+# ============================================================
+
+def _exit_with_error(message: str) -> None:
+    """
+    build_slide 用のエラー終了。
+    旧 slideinfo.py と同じように、エラーを表示して終了する。
+    """
     print(f"❌ エラー: {message}", file=sys.stderr)
     sys.exit(1)
 
-def _load_yaml(path: Path) -> dict:
-    """ファイルをチェックしてYAMLを読み込むヘルパー"""
-    if not path.exists():
-        _exit_with_error(f"ファイルが見つかりません: {path}")
-    
+
+def _safe_call(func, *args, **kwargs):
+    """
+    utils.py 側で発生した例外を、build_slide 用のメッセージにして終了する。
+    """
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            data = yaml.load(f)
-            if data is None:
-                _exit_with_error(f"ファイルが空です: {path}")
-            return data
+        return func(*args, **kwargs)
     except Exception as e:
-        _exit_with_error(f"YAMLの読み込みに失敗しました ({path}): {e}")
+        _exit_with_error(str(e))
 
-def _get_required_key(data: dict, key: str, context: str = "設定"):
-    """辞書から必須キーを取得するヘルパー。ない場合は終了"""
-    if key not in data:
-        _exit_with_error(f"{context} 内に必須キー '{key}' が見つかりません。")
-    return data[key]
 
-def readslideyaml():
-    """メインの設定ファイル dirinfo.yaml を読み込む"""
-    return _load_yaml(DIRINFO_PATH)
+# ============================================================
+# Public functions for build_slides1.py
+# ============================================================
 
-def getsourcedir():
-    """ソースディレクトリのルートを取得する"""
-    sdic = readslideyaml()
-    fsyear = _get_required_key(sdic, "fsyear", "dirinfo.yaml")
-    year_conf = _get_required_key(sdic, fsyear, f"年度設定({fsyear})")
-    
-    return _get_required_key(year_conf, "dir", f"{fsyear}のディレクトリ設定")
+def getsourcedir() -> str:
+    """
+    現在年度の授業資料ルートを返す。
 
-def outputslideyaml(sdic, filename="slideinfo.yaml"):
-    """YAMLファイルに書き出す"""
-    path = BUILD_SLIDE_ROOT / filename
+    旧 slideinfo.py の getsourcedir() 相当。
+
+    例:
+        /Volumes/NBPlan/TTC/授業資料/2026年度/
+    """
+    source_root = _safe_call(get_source_root)
+    return str(source_root)
+
+
+def slidedir(subject: str, course: str) -> str:
+    """
+    授業資料ルートから見た、指定授業回フォルダの相対パスを返す。
+
+    旧 slideinfo.py の slidedir() 相当。
+
+    例:
+        subject = "1020701"
+        course  = "02"
+
+    戻り値:
+        1020701.GITバージョン管理/02
+    """
+    return _safe_call(get_lesson_relative_dir, subject, course)
+
+
+def slidetitle(subject: str, course: str) -> str:
+    """
+    科目別 slideinfo.yaml から、指定授業回の title を返す。
+
+    旧 slideinfo.py の slidetitle() 相当。
+    """
+    return _safe_call(get_lesson_title, subject, course)
+
+
+def slideinfoupdate(subject: str, course: str) -> None:
+    """
+    科目別 slideinfo.yaml の created_at / update_at / count を更新する。
+
+    旧 slideinfo.py の slideinfoupdate() 相当。
+
+    slideinfo.yaml の構造は次のような想定。
+
+    '02':
+      title: コンピュータと2進数の基本
+      schedule_type: 授業
+      count: 51
+      created_at: '2026-03-17 12:45:28'
+      update_at: '2026-05-06 07:36:16'
+    """
     try:
-        with open(path, 'w', encoding='utf-8') as f:
-            yaml.dump(sdic, f)
-    except Exception as e:
-        _exit_with_error(f"ファイルの書き出しに失敗しました ({path}): {e}")
+        fsyear = get_current_fsyear()
+        slideinfo_data, subject_dir = load_slideinfo_by_subno(subject, fsyear)
 
-def slidedir(subject, course):
-    """スライドのディレクトリパスを生成する"""
-    sdic = readslideyaml()
-    fsyear = _get_required_key(sdic, "fsyear", "dirinfo.yaml")
-    year_conf = _get_required_key(sdic, fsyear, f"年度設定({fsyear})")
-    
-    subject_dir = _get_required_key(year_conf, subject, f"科目設定({subject})")
-    return f"{subject_dir}/{course}"
+        course = str(course).zfill(2)
 
-def slidetitle(subject, course):
-    """科目別の slideinfo.yaml からタイトルを取得する"""
-    sdic = readslideyaml()
-    fsyear = _get_required_key(sdic, "fsyear", "dirinfo.yaml")
-    year_conf = _get_required_key(sdic, fsyear, f"年度設定({fsyear})")
-    
-    # 科目のベースディレクトリを取得
-    base_pt = Path(_get_required_key(year_conf, "dir", "共通ディレクトリ設定"))
+        course_data = get_required_key(
+            slideinfo_data,
+            course,
+            f"slideinfo.yaml の授業回設定({course})",
+        )
 
-    subject_dir = _get_required_key(year_conf, subject, f"科目設定({subject})")
-    
-    # 科目別設定ファイルのパス
-    info_path = base_pt / subject_dir / "slideinfo" / "slideinfo.yaml"
-    
-    # 科目別設定の読み込み
-    conf = _load_yaml(info_path)
-    course_data = _get_required_key(conf, course, f"コース設定({course})")
-    
-    return _get_required_key(course_data, "title", f"{course} のタイトル設定")
+        if not isinstance(course_data, dict):
+            raise TypeError(f"授業回設定({course}) がdict形式ではありません。")
 
-def slideinfoupdate(subject, course):
-    """科目別の slideinfo.yaml を探し、更新日時とカウントを更新する"""
-    # 1. まず「地図(dirinfo.yaml)」を読み、科目別ファイルの場所を特定する
-    sdic = readslideyaml()
-    fsyear = _get_required_key(sdic, "fsyear", "dirinfo.yaml")
-    year_conf = _get_required_key(sdic, fsyear, f"年度設定({fsyear})")
-    
-    base_pt = Path(_get_required_key(year_conf, "dir", "共通ディレクトリ設定"))
-    
-    # 科目別設定ファイルのフルパスを構築
-    subject_dir = _get_required_key(year_conf, subject, f"科目設定({subject})")
-    # (あなたのフォルダ構成に合わせて /slideinfo/slideinfo.yaml を指定)
-    info_path = base_pt / subject_dir / "slideinfo" / "slideinfo.yaml"
-    
-    # 2. 「台帳(科目別のslideinfo.yaml)」を読み込む
-    conf = _load_yaml(info_path)
-    course_data = _get_required_key(conf, course, f"コース設定({course})")
-    
-    # 3. データの更新
-    dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    count = course_data.get('count', 0)
-    
-    # get()で値を取得し、それが「空（None, '', 0等）」かどうかを判定
-    if not course_data.get('created_at'):
-        # キーがない、または中身が空文字 '' の場合はこちら
-        course_data['created_at'] = dt
-    else:
-        # すでに何らかの文字列が入っている場合はこちら
-        course_data['update_at'] = dt
-    
-    course_data['count'] = count + 1
-    
-    # 4. 「台帳」ファイルに上書き保存
-    try:
-        with open(info_path, 'w', encoding='utf-8') as f:
-            yaml.dump(conf, f)
+        dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        count = course_data.get("count", 0)
+
+        try:
+            count = int(count)
+        except Exception:
+            count = 0
+
+        if not course_data.get("created_at"):
+            course_data["created_at"] = dt
+        else:
+            course_data["update_at"] = dt
+
+        course_data["count"] = count + 1
+
+        save_slideinfo(subject_dir, slideinfo_data)
+
         print(f"✅ 台帳更新完了: {subject}/{course} (Count: {course_data['count']})")
-    except Exception as e:
-        _exit_with_error(f"台帳の保存に失敗しました ({info_path}): {e}")
 
-if __name__ == '__main__':
-    # テスト用
-    try:
-        print("--- Source Dir ---")
-        print(getsourcedir())
-        print(slidetitle("1020701", "02"))
-        print("\n--- Slide Dir ---")
-        # 実際の値に合わせてテストしてください
-        # print(slidedir('1020701', '02'))
     except Exception as e:
-        print(f"予期せぬエラー: {e}")
+        _exit_with_error(str(e))
+
+
+# ============================================================
+# Compatibility / debug functions
+# ============================================================
+
+def readslideyaml() -> dict[str, Any]:
+    """
+    旧 slideinfo.py 互換用。
+
+    以前は build_slide/dirinfo/dirinfo.yaml を読んでいたが、
+    新構成では @TTC/dirinfo/dirinfo.yaml を読む。
+
+    ただし build_slides1.py からは通常使わない。
+    """
+    try:
+        from utils import load_dirinfo
+        return load_dirinfo()
+    except Exception as e:
+        _exit_with_error(str(e))
+
+
+# ============================================================
+# Simple test
+# ============================================================
+
+if __name__ == "__main__":
+    print("=" * 70)
+    print("build_slide/scripts/slideinfo.py 動作確認")
+    print("=" * 70)
+
+    try:
+        print("\n[1] パス確認")
+        print("BUILD_SLIDE_ROOT:", BUILD_SLIDE_ROOT)
+        print("TTC_ROOT        :", TTC_ROOT)
+        print("COMMON_UTIL_DIR :", COMMON_UTIL_DIR)
+        print("COMMON_UTIL exists:", COMMON_UTIL_DIR.exists())
+
+        print("\n[2] 授業資料ルート確認")
+        print("getsourcedir():", getsourcedir())
+
+        # 必要に応じて変更してください
+        subject = "1020701"
+        course = "02"
+
+        print("\n[3] テスト対象")
+        print("subject:", subject)
+        print("course :", course)
+
+        print("\n[4] slidedir() 確認")
+        print("slidedir:", slidedir(subject, course))
+
+        print("\n[5] slidetitle() 確認")
+        print("slidetitle:", slidetitle(subject, course))
+
+        print("\n[6] slideinfoupdate() 確認")
+        print("注意: 実行すると slideinfo.yaml の count / created_at / update_at が更新されます。")
+        print("テストでは自動実行しません。必要なら次の行のコメントを外してください。")
+        # slideinfoupdate(subject, course)
+
+        print("\n✅ slideinfo.py の確認が完了しました。")
+
+    except Exception as e:
+        print("\n❌ 動作確認中にエラーが発生しました。")
+        print(type(e).__name__, ":", e)
+        raise
